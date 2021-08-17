@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>防抖和节流</title>
+    <style>
+        body {
+            height: 10000px;
+        }
+    </style>
+</head>
+
+<body>
+    <script>
+        document.body.onscroll = throttle2(log, 2000);
+
+        function log() {
+            console.log("执行了");
+        }
+        /*
+            总结：相同的部分：闭包，return一个函数，直接wait秒后执行fn
+            1、防抖：不停地clear，就是不停的重置，那就是防抖
+            2、节流-定时器：判断timer，null的时候才开启定时器，执行的时候设为null
+            3、节流-时间戳：记录一个start，now-start >= wait的时候，就执行
+        */
+
+        //防抖-简单版 记忆思路：闭包定时器，返回一个函数2秒后执行方法，一旦再次触发，清空定时器，重新计时。
+        function debounce(fn, wait) {
+            var timer;
+            return function () {
+                clearTimeout(timer);
+                timer = setTimeout(fn, wait);
+            }
+        }
+
+        //节流-定时器版 特点：先执行
+        function throttle(fn, wait) {
+            var start = new Date().getTime();
+            return function () {
+                var now = new Date().getTime();
+                if (now - start >= wait) {
+                    fn();
+                    start = now;
+                }
+            }
+        }
+
+        //节流-定时器 特点：后执行
+        function throttle2(fn, wait) {
+            var timer;
+            return function () {
+                if (!timer) {
+                    timer = setTimeout(() => {
+                        timer = null;
+                        fn();
+                    }, wait);
+                }
+            }
+        }
+
+    </script>
+</body>
+
+</html>

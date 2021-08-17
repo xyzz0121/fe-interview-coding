@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>柯里化</title>
+</head>
+<body>
+    <script>
+        const add = (a,b,c) => {
+            return a - b - c
+        }
+
+        //返回一个函数，判断函数的参数个数，传够了，直接执行原函数，返回结果；不够数的话，返回一个函数继续接收参数，递归
+        const curry = fn => 
+            judge = (...args) => 
+                args.length === fn.length ?
+                    fn(...args): arg => judge(...args, arg);
+
+
+        //可理解版 同上 简单版
+        // const curry = (fn) => {
+        //     const judge = (...args) => {
+        //         if (args.length === fn.length) {
+        //             return fn(...args);
+        //         }else{
+        //             return (arg) => judge(...args, arg)
+        //         }
+        //     }
+        //     return judge;
+        // }
+
+        const curryAdd = curry(add);
+
+        console.log(curryAdd(1)(2)(3));
+        console.log(curryAdd(3)(2)(1));
+
+    </script>
+</body>
+</html>

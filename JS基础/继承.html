@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>继承</title>
+</head>
+<body>
+    <script>
+        //原型链、经典、组合、原型式、寄生式、寄生组合, 重要的写出来两种
+
+        /*
+            总结：组合继承核心代码
+            Parent.call(this, name);
+            Child.prototype = new Parent();
+
+            寄生组合式核心代码 好处：减少一次父类构造函数的执行
+            Parent.call(this, name);
+            function F(){}; 
+            F.prototype = Parent.prototype; 
+            Child.prototype = new F();
+        */
+
+
+
+
+        //组合继承
+        // function Parent(name){
+        //     this.name = name;
+        // }
+        // Parent.prototype.sayName = function(){
+        //     alert(this.name)
+        // }
+
+        // function Child(name, age){
+        //     Parent.call(this, name);
+        //     this.age = age;
+        // }
+
+        // Child.prototype = new Parent();
+        // Child.prototype.constructor = Child;
+
+        // const child1 = new Child("张三", 19);
+        // const child2 = new Child("李四", 28);
+
+        // child1.sayName();
+        // child2.sayName();
+
+
+        //寄生组合
+        function Parent(name){
+            this.name = name;
+        }
+
+        Parent.prototype.sayName = function(){
+            alert(this.name);
+        }
+
+        function Child(name, age){
+            Parent.call(this, name);
+            this.age = age;
+        }
+
+        function F(){};
+        F.prototype = Parent.prototype;
+        Child.prototype = new F();
+
+        
+        const child1 = new Child("张三", 19);
+        const child2 = new Child("李四", 28);
+
+        child1.sayName();
+        child2.sayName();
+
+
+
+
+    </script>
+</body>
+</html>
