@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数组扁平化</title>
+</head>
+<body>
+    <script>
+        /**
+         * 总结
+         * 1.现成ES新方法
+         * 2.同深拷贝，先写最简单的形式， res = res.concat(item); 然后加一个判断条件递归完事
+         * */
+        var arr = [
+            100,
+            [1,2,3],
+            [3,4,10,[2,0,1]]
+        ];
+        //方法1 ES最新语法
+        console.log(arr.flat(Infinity));
+        //方法2 递归
+        const flat = (arr) => {
+            let res = [];
+            arr.forEach(item => {
+                res = res.concat(Array.isArray(item) ? flat(item) : item);
+            });
+            return res;
+        }
+        console.log(flat(arr));
+
+    </script>
+</body>
+</html>

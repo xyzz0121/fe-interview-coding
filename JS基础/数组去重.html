@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数组去重</title>
+</head>
+<body>
+    <script>
+        /*
+            总结
+            Set又去代课了
+        */
+        var arr = [1,2,3,4,"4",4,5,2,0];
+        //方法1 [...new Set(arr)]
+        console.log([...new Set(arr)]);
+        //方法2 indexOf
+        const removeRepeat = (arr) => arr.filter((item, index) => arr.indexOf(item) === index);
+
+        console.log(removeRepeat(arr));
+    </script>
+</body>
+</html>

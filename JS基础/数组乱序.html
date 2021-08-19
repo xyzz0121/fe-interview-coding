@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数组乱序</title>
+</head>
+<body>
+    <script>
+        /*
+            总结：第一个元素和后面随机一个元素交换
+        */
+        const arr = [1,2,3,4,5];
+        const dSort = (arr) => {
+            arr.forEach((item, index) => {
+                const radom = Math.floor(Math.random() * arr.length);
+                [arr[0], arr[radom]] = [arr[radom], arr[0]];
+            });
+            return arr;
+        }
+
+        console.log(dSort(arr))
+    </script>
+</body>
+</html>

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>深拷贝</title>
+</head>
+<body>
+    <script>
+        /*
+            总结，forin 同时遍历对象或者数组
+            正常浅拷贝 就是遍历 然后赋值 res[key] = obj[key]
+            深拷贝多一个判断 是对象就递归
+            齐活
+        */
+
+        var a = {b: 1, c: { d: 1}};
+
+        function deepCopy(obj){
+            if (typeof obj !== "object") {
+                return obj;
+            }
+            
+            var res = Array.isArray(obj)? [] : {};
+            for (const key in obj) {
+                res[key] = typeof obj[key] === "object" ?  deepCopy(obj[key]) : obj[key];
+            }
+            return res
+        }
+
+        console.log(deepCopy(a));
+        a.c.d = 2;
+    </script>
+</body>
+</html>

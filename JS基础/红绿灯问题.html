@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>红绿灯问题</title>
+</head>
+<body>
+    <script>
+        /*
+            🚥 红灯三秒亮一次，绿灯一秒亮一次，黄灯2秒亮一次；如何让三个灯不断交替重复亮灯？（用 Promse 实现）
+            总结：三段式 
+            第一段：输出方法， 
+            第二段：开灯方法 返回一个promise 里面定时器操作
+            第三段：调用开灯方法
+        */
+        const red = () => { console.log("red") };
+        const yellow = () => { console.log("yellow") };
+        const green = () => { console.log("green") };
+
+        const light = (timer, fn) => 
+            new Promise((resole, reject)=>{
+                setTimeout(() => {
+                    fn();
+                    resole()
+                }, timer);
+            });
+
+        const  step = () => {
+            light(3000, red)
+            .then(()=>{
+                return light(1000, green);
+            })
+            .then(()=>{
+                return light(2000, yellow);
+            })
+            .then(()=>{
+                step();
+            })
+        }
+
+        step();
+    </script>
+</body>
+</html>
