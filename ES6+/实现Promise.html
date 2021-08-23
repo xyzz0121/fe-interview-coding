@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>实现Promise</title>
+</head>
+
+<body>
+    <script>
+        /**
+         * 参考 https://zhuanlan.zhihu.com/p/58428287
+         * */
+
+        /**
+         * Promise是异步编程的一种解决方案，代替的是原来的回调函数的形式
+         * 然而本质上还是调用和封装回调函数，只不过要把嵌套的回调变成 .then.then 的链式 多层变成一层
+        */
+
+        //hello world 版
+        // class Promise {
+        //     constructor(fn) {
+        //         fn();
+        //     }
+        // }
+        // let p = new Promise(() => {
+        //     setTimeout(() => {
+        //         console.log('hello world!');
+        //     }, 2000);
+        // });
+        /**
+         * 极简实现  注意执行顺序 .then 虽然在最后面，其实最先执行 思考思考 js执行机制
+         * 所以resolve的时候，本质是执行之前.then的的回调
+        */
+
+        // 
+        // class Promise {
+        //     callbacks = [];
+        //     constructor(fn) {
+        //         fn(this._resolve.bind(this));
+        //     }
+        //     then(onFulfilled) {
+        //         this.callbacks.push(onFulfilled);
+        //         return this; //实现链式操作
+        //     }
+        //     _resolve(value) {
+        //         this.callbacks.forEach(fn => fn(value));
+        //     }
+        // }
+
+        // //Promise应用
+        // let p = new Promise(resolve => {
+        //     setTimeout(() => {
+        //         console.log("done");
+        //         resolve('2秒');
+        //     }, 2000);
+        // })
+        // .then((tip) => {
+        //     console.log(tip);
+        // })
+        // .then((tip2) => {
+        //     console.log(tip2);
+        // })
+
+        //完整的实现
+        let promiseCount = 1;
+        //完整的实现 测试Demo
+        class Promise {
+            callbacks = [];
+            state = 'pending';//增加状态
+            value = null;//保存结果
+            constructor(fn) {
+                fn(this._resolve.bind(this));
+            }
+            then(onFulfilled) {
+                return new Promise(resolve => {
+                    this._handle({
+                        onFulfilled: onFulfilled || null,
+                        resolve: resolve
+                    });
+                });
+            }
+            _handle(callback) {
+                if (this.state === 'pending') {
+                    this.callbacks.push(callback);
+                    return;
+                }
+                //如果then中没有传递任何东西
+                if (!callback.onFulfilled) {
+                    callback.resolve(this.value);
+                    return;
+                }
+                var ret = callback.onFulfilled(this.value);
+                callback.resolve(ret);
+            }
+            _resolve(value) {
+
+                if (value && (typeof value === 'object' || typeof value === 'function')) {
+                    var then = value.then;
+                    if (typeof then === 'function') {
+                        then.call(value, this._resolve.bind(this));
+                        return;
+                    }
+                }
+
+                this.state = 'fulfilled';//改变状态
+                this.value = value;//保存结果
+                this.callbacks.forEach(callback => this._handle(callback));
+            }
+        }
+
+        /**
+         * 模拟异步请求
+         * @param {*} url 
+         * @param {*} s 
+         * @param {*} callback 
+         */
+        const mockAjax = (url, s, callback) => {
+            setTimeout(() => {
+                callback(url + '异步请求耗时' + s + '秒');
+            }, 1000 * s)
+        }
+
+        new Promise(resolve => {
+            mockAjax('getUserId', 1, function (result) {
+                resolve(result);
+            })
+        }).then(result => {
+            console.log(result);
+        })
+
+
+
+    </script>
+</body>
+
+</html>
