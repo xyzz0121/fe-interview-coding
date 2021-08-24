@@ -1,6 +1,8 @@
-### 流程图
+### 流程图及笔记
 由表及里，由浅入深
 
+#### 0、项目构建
+- rollup 专注打包js 简洁 包小 也没有webpack require那一堆东西 做项目webpack  写js库用rollup更好 vue 和react 都是用的rollup
 #### 1、Vue用法是
 ```
 const vm = new Vue({
@@ -9,7 +11,6 @@ const vm = new Vue({
         return { value : 1}
     }
 })
-
 ```
 #### 2、所以 Vue 应该是一个类
 ```
@@ -21,10 +22,14 @@ function Vue(){}
 所以有一堆插件，来拼出完成的vue原型方法
 ```
 #### 3、数据是一切的基础，所以我们先初始化数据
-```
 写一个 initMixin 插件用于初始化
 这里实现
 1、实例的$options 
 2、状态初始化 data props watch computed 
 
-```
+vue 不是一个mvvm框架，因为它可以操作dom（$ref）。mvvm是啥意思？数据变化视图会更新，视图变化数据会被影响，不能跳过数据去直接去更新视图
+
+#### 4、初始化完数据，需要把数据变成响应式（对象）
+
+使用defineproperty，全递归，把一个普通对象变成1个响应式对象
+vue2 响应式 性能差 也是因为这个
