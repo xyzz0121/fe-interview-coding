@@ -20,8 +20,75 @@
     return _typeof(obj);
   }
 
+  function _classCallCheck(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+
+  function _defineProperties(target, props) {
+    for (var i = 0; i < props.length; i++) {
+      var descriptor = props[i];
+      descriptor.enumerable = descriptor.enumerable || false;
+      descriptor.configurable = true;
+      if ("value" in descriptor) descriptor.writable = true;
+      Object.defineProperty(target, descriptor.key, descriptor);
+    }
+  }
+
+  function _createClass(Constructor, protoProps, staticProps) {
+    if (protoProps) _defineProperties(Constructor.prototype, protoProps);
+    if (staticProps) _defineProperties(Constructor, staticProps);
+    return Constructor;
+  }
+
+  /**
+   * 用 defineProperty 递归把data所有属性都变成响应式
+   */
+  var Observer = /*#__PURE__*/function () {
+    function Observer(data) {
+      _classCallCheck(this, Observer);
+
+      //一步一步把defineProperty全都重新定义一下 使原来的对象每个属性发生变化的时候 都能get到，也就是将一个普通对象变成一个响应式对象
+      this.walk(data);
+    }
+
+    _createClass(Observer, [{
+      key: "walk",
+      value: function walk(data) {
+        var keys = Object.keys(data);
+        keys.forEach(function (key) {
+          defineReactive(data, key, data[key]);
+        });
+      }
+    }]);
+
+    return Observer;
+  }(); //Vue.util.defineReactive 把对象的某个属性变成响应式
+
+
+  function defineReactive(data, key, value) {
+    observe(value);
+    Object.defineProperty(data, key, {
+      get: function get() {
+        console.log("获取", data, key, value);
+        return value;
+      },
+      set: function set(newValue) {
+        console.log("设置", data, key, value);
+        if (value === newValue) return;
+        observe(newValue);
+        value = newValue;
+      }
+    });
+  }
+
   function observe(data) {
-    console.log(data);
+    if (_typeof(data) !== "object" || data === null) {
+      return;
+    }
+
+    return new Observer(data);
   }
 
   function initState(vm) {
@@ -42,7 +109,7 @@
 
   function initData(vm) {
     var data = vm.$options.data;
-    data = _typeof(data) ? data.call(vm) : data; //有对象了 就要劫持 
+    vm._data = data = _typeof(data) ? data.call(vm) : data; //有对象了 就要劫持 
     //对象的劫持方案：object.defineProperty();
     //对象里嵌套数组的劫持方案: 单独处理
 

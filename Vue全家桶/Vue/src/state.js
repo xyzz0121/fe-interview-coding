@@ -26,7 +26,7 @@ function initMethods() {}
 
 function initData(vm) {
     let data = vm.$options.data;
-    data = typeof data ? data.call(vm) : data;
+    vm._data = data = typeof data ? data.call(vm) : data;
     //有对象了 就要劫持 
     //对象的劫持方案：object.defineProperty();
     //对象里嵌套数组的劫持方案: 单独处理
