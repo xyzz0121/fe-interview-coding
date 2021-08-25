@@ -9,13 +9,15 @@
 </head>
 
 <body>
-    <div id="app"></div>
+    <div id="app">
+        <div id="a">hello, {{name}} <span>world</span></div>
+    </div>
     <script src="./dist/umd/vue.js"></script>
     <script>
         const vm = new Vue({
             el: "#app",
             data: function () {
-                return { arr: [{ a: 1 }] };
+                return { arr: [{ a: 1 }], obj: {a:1, b:"asdasdasd"}, name: 'jack' };
             }
         });
         // vm.arr = 1;
