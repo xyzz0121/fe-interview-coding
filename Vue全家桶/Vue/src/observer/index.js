@@ -1,3 +1,4 @@
+import { defineProperty } from "../util";
 import { arrayMethods } from "./array";
 
 /**
@@ -6,11 +7,7 @@ import { arrayMethods } from "./array";
 class Observer{
     constructor(data){
         //hack骚操作，把observeArray挂在调用函数的this上，在array.js里还可以使用。同时也可以标记对象或者数组已经被观测。
-        Object.defineProperty(data, "__ob__", {
-            enumerable: false, //不可枚举，不能被循环出来，相当于隐藏属性
-            configurable: false,
-            value: this
-        })
+        defineProperty(data, "__ob__", this);
         //一步一步把defineProperty全都重新定义一下 使原来的对象每个属性发生变化的时候 都能get到，也就是将一个普通对象变成一个响应式对象
         if (Array.isArray(data)) {
             //函数劫持

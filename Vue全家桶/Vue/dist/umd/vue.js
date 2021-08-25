@@ -42,6 +42,27 @@
     return Constructor;
   }
 
+  //访问和设置vm，代理到访问和设置vm[data]
+  function proxy(vm, data, key) {
+    Object.defineProperty(vm, key, {
+      get: function get() {
+        return vm[data][key];
+      },
+      set: function set(newValue) {
+        vm[data][key] = newValue;
+      }
+    });
+  } //添加不可枚举、不可遍历的属性
+
+  function defineProperty(data, key, value) {
+    Object.defineProperty(data, key, {
+      enumerable: false,
+      //不可枚举，不能被循环出来，相当于隐藏属性
+      configurable: false,
+      value: value
+    });
+  }
+
   /**
    * 重写数组方法
    * 思路：先继承，后重写，用的时候，先找实例
@@ -90,12 +111,7 @@
       _classCallCheck(this, Observer);
 
       //hack骚操作，把observeArray挂在调用函数的this上，在array.js里还可以使用。同时也可以标记对象或者数组已经被观测。
-      Object.defineProperty(data, "__ob__", {
-        enumerable: false,
-        //不可枚举，不能被循环出来，相当于隐藏属性
-        configurable: false,
-        value: this
-      }); //一步一步把defineProperty全都重新定义一下 使原来的对象每个属性发生变化的时候 都能get到，也就是将一个普通对象变成一个响应式对象
+      defineProperty(data, "__ob__", this); //一步一步把defineProperty全都重新定义一下 使原来的对象每个属性发生变化的时候 都能get到，也就是将一个普通对象变成一个响应式对象
 
       if (Array.isArray(data)) {
         //函数劫持
@@ -170,9 +186,14 @@
 
   function initData(vm) {
     var data = vm.$options.data;
-    vm._data = data = _typeof(data) ? data.call(vm) : data; //有对象了 就要劫持 
+    vm._data = data = _typeof(data) ? data.call(vm) : data; //把vm.arr 代理到 vm._data.arr 实现真正的获取data
+
+    for (var key in data) {
+      proxy(vm, "_data", key);
+    } //有对象了 就要劫持 
     //对象的劫持方案：object.defineProperty();
     //对象里嵌套数组的劫持方案: 单独处理
+
 
     observe(data);
   }
