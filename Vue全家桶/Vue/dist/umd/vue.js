@@ -11,29 +11,95 @@
     var qnameCapture = "((?:" + ncname + "\\:)?" + ncname + ")";
     var startTagOpen = new RegExp("^<" + qnameCapture);
     var startTagClose = /^\s*(\/?)>/;
-
-    function start(tagName, attrs) {
-      console.log(tagName);
-      console.log(attrs);
-    }
-
+    var endTag = new RegExp("^<\\/" + qnameCapture + "[^>]*>"); //html to ast
 
     function parseHTML(html) {
-      //解析过程 边解析边删除，直到所有解析完成
+      function createASTElement(tagName, attrs) {
+        return {
+          tag: tagName,
+          type: 1,
+          //html 元素 type是1
+          children: [],
+          attrs: attrs,
+          parent: null
+        };
+      }
+
+      var root;
+      var currentParent;
+      var stack = []; //用栈 判断标签时候合法
+
+      function start(tagName, attrs) {
+        var element = createASTElement(tagName, attrs);
+
+        if (!root) {
+          root = element;
+        }
+
+        currentParent = element;
+        stack.push(element);
+      }
+
+      function end(tagName) {
+        var element = stack.pop(); //取出栈最后一个 进行比较 看看标签是否配对
+
+        currentParent = stack[stack.length - 1];
+
+        if (currentParent) {
+          //闭合时知道，当前标签的父子关系
+          element.parent = currentParent;
+          currentParent.children.push(element);
+        }
+      }
+
+      function chars(text) {
+        text = text.replace(/\s/g, '');
+
+        if (text) {
+          currentParent.children.push({
+            type: 3,
+            //html 文本 type是3
+            text: text
+          });
+        }
+      } //解析过程 边解析边删除，直到所有解析完成
+
+
       while (html) {
         //只要Html不空，就一直解析
         //观察规律，看当前第一个字符是不是 < ，是 < 就一定是一个标签
         var textEnd = html.indexOf("<");
 
         if (textEnd === 0) {
+          //TODO: v-bind :value 等等
           //先看看是不是开始标签，那么先解析开始标签
           var startTagMatch = parseStartTag();
 
           if (startTagMatch) {
             start(startTagMatch.tagName, startTagMatch.attrs);
-          }
+            continue;
+          } //不是开始标签，就是结束标签
 
-          break;
+
+          var endTagMatch = html.match(endTag);
+
+          if (endTagMatch) {
+            end(endTagMatch[0]);
+            advance(endTagMatch[0].length);
+            continue;
+          }
+        }
+
+        var text = void 0; //< 位置 大于0 当前字符串是文本
+
+        if (textEnd > 0) {
+          text = html.substring(0, textEnd);
+        } //有文本 记录文本 删除文本
+
+
+        if (text) {
+          advance(text.length);
+          chars(text);
         }
       }
 
@@ -71,11 +137,14 @@
           }
         }
       }
+
+      return root;
     } //把template编译成render函数
 
 
     function compileToFunctions(template) {
-      parseHTML(template);
+      var ast = parseHTML(template);
+      console.log(ast);
     }
 
     function _typeof(obj) {
