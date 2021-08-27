@@ -78,3 +78,5 @@ AST可以描述所有语法，html\css\js，虚拟dom只能描述dom。
 #### 7、然后把AST转化为render方法字符串
 
 遍历AST，一点点拼接字符串
+
+正则全局匹配的 lastIndex

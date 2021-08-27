@@ -103,7 +103,6 @@
 
   //把ast元素的属性，生成render字符串
   function genProps(attrs) {
-    console.log(attrs);
     var str = '';
     attrs.forEach(function (attr) {
       if (attr.name === "style") {
@@ -125,12 +124,41 @@
     return "{".concat(str.slice(0, -1), "}"); //去掉多余逗号
   }
 
+  var defaultTagRE = /\{\{((?:.|\r?\n)+?)\}\}/g;
+
   function gen(node) {
     if (node.type === 1) {
-      generate(node);
+      return generate(node);
     } else {
-      var text = node.text;
-      return "_v(".concat(JSON.stringify(text), ")");
+      var text = node.text; //如果不存在 {{}} 这种变量
+
+      if (!defaultTagRE.test(text)) {
+        return "_v(".concat(JSON.stringify(text), ")");
+      } //存在的话，用正则一点点把字符串拆开，给变量加上 _s()
+
+
+      var tokens = []; //存放每一段代码
+
+      var lastIndex = defaultTagRE.lastIndex = 0; //全局模式，每次index置为0 , 因为上面执行了一次 defaultTagRE.test 所以政策而index要归位
+
+      var match, index; // 匹配到的结果
+
+      while (match = defaultTagRE.exec(text)) {
+        index = match.index; //说明匹配到的结果不是第一个元素，那说明前面这部分是普通字符串
+
+        if (index > lastIndex) {
+          tokens.push(JSON.stringify(text.slice(lastIndex, index)));
+        }
+
+        tokens.push("_s(".concat(match[1].trim(), ")"));
+        lastIndex = index + match[0].length;
+      }
+
+      if (lastIndex < text.length) {
+        tokens.push(JSON.stringify(text.slice(lastIndex)));
+      }
+
+      return "_v(".concat(tokens.join('+'), ")");
     }
   }
 
