@@ -329,8 +329,43 @@
     return render;
   }
 
+  function patch(oldVnode, vnode) {
+    //将虚拟dom转化为真实节点 递归创建元素的过程
+    var el = createElm(vnode); //产生真实dom
+
+    var parentElm = oldVnode.parentNode; // 获取旧的节点的父亲
+
+    console.log(parentElm);
+    parentElm.insertBefore(el, oldVnode.nextSibiling); //当前真实元素插入到app的后面
+
+    parentElm.removeChild(oldVnode); //删除旧的节点
+  }
+
+  function createElm(vnode) {
+    var tag = vnode.tag;
+        vnode.data;
+        vnode.key;
+        var children = vnode.children,
+        text = vnode.text;
+
+    if (typeof tag === "string") {
+      //创建元素，放到vnode.el上
+      vnode.el = document.createElement(tag);
+      children.forEach(function (child) {
+        vnode.el.appendChild(createElm(child));
+      });
+    } else {
+      vnode.el = document.createTextNode(text);
+    }
+
+    return vnode.el;
+  }
+
   function lifecycleMixin(Vue) {
-    Vue.prototype._update = function (vnode) {};
+    Vue.prototype._update = function (vnode) {
+      var vm = this;
+      patch(vm.$el, vnode);
+    };
   }
   function mountComponent(vm, el) {
     //先调用render方法创建虚拟节点，再将虚拟节点渲染到页面上 vue核心！！！！
@@ -507,7 +542,8 @@
     Vue.prototype.$mount = function (el) {
       var vm = this;
       var options = vm.$options;
-      el = document.querySelector(el); //按照优先级处理，保证最后统一为 render函数渲染
+      el = document.querySelector(el);
+      vm.$el = el; //按照优先级处理，保证最后统一为 render函数渲染
 
       if (!options.render) {
         var template = options.template;
@@ -545,7 +581,6 @@
       var vm = this;
       var render = vm.$options.render;
       var vnode = render.call(vm);
-      console.log(vnode);
       return vnode;
     };
   }
