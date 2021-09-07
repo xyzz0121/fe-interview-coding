@@ -1,4 +1,6 @@
 import { initMixin } from "./init";
+import { lifecycleMixin } from "./lifecycle";
+import { renderMixin } from "./vdom/index";
 
 /**
  * Vue 类的声明
@@ -12,5 +14,10 @@ function Vue(options) {
 
 //插件1：初始化操作都在这里
 initMixin(Vue);
+//插件2：生命周期，其实就是渲染
+lifecycleMixin(Vue);
+//插件3：render生成虚拟dom
+renderMixin(Vue);
+
 
 export default Vue;

@@ -10,6 +10,10 @@ export function compileToFunctions(template) {
 
     //3、AST重新生成代码
     const code = generate(ast);
+    
+    //4、把code字符串转化成真正的函数 通过with进行设置取值
+    const render = new Function(`with(this){return ${code}}`);
 
-    console.log(code);
+    return render;
+    
 }

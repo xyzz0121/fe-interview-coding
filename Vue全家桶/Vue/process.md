@@ -80,3 +80,7 @@ AST可以描述所有语法，html\css\js，虚拟dom只能描述dom。
 遍历AST，一点点拼接字符串
 
 正则全局匹配的 lastIndex
+
+#### 8、核心1-调用render，生成虚拟dom
+实现 _c（创建元素） _s （字符串化） _v (创建文本元素)
+调用render，生成虚拟dom

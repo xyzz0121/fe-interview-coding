@@ -323,8 +323,18 @@
     var ast = parseHTML(template); //2、TODO:优化静态节点
     //3、AST重新生成代码
 
-    var code = generate(ast);
-    console.log(code);
+    var code = generate(ast); //4、把code字符串转化成真正的函数 通过with进行设置取值
+
+    var render = new Function("with(this){return ".concat(code, "}"));
+    return render;
+  }
+
+  function lifecycleMixin(Vue) {
+    Vue.prototype._update = function (vnode) {};
+  }
+  function mountComponent(vm, el) {
+    //先调用render方法创建虚拟节点，再将虚拟节点渲染到页面上 vue核心！！！！
+    vm._update(vm._render());
   }
 
   //访问和设置vm，代理到访问和设置vm[data]
@@ -433,11 +443,9 @@
     observe(value);
     Object.defineProperty(data, key, {
       get: function get() {
-        console.log("获取", key, value);
         return value;
       },
       set: function set(newValue) {
-        console.log("设置", key, value);
         if (value === newValue) return;
         observe(newValue);
         value = newValue;
@@ -510,7 +518,60 @@
 
         var render = compileToFunctions(template);
         options.render = render;
-      }
+      } //这里保证有render方法，开始渲染挂载元素
+
+
+      mountComponent(vm);
+    };
+  }
+
+  function renderMixin(Vue) {
+    //创建元素
+    Vue.prototype._c = function () {
+      return createElement.apply(void 0, arguments);
+    }; //stringify
+
+
+    Vue.prototype._s = function (val) {
+      return val == null ? "" : _typeof(val) === "object" ? JSON.stringify(val) : val;
+    }; //创建文本元素
+
+
+    Vue.prototype._v = function (text) {
+      return createTextVnode(text);
+    };
+
+    Vue.prototype._render = function () {
+      var vm = this;
+      var render = vm.$options.render;
+      var vnode = render.call(vm);
+      console.log(vnode);
+      return vnode;
+    };
+  }
+
+  function createElement(tag) {
+    var data = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+
+    for (var _len = arguments.length, children = new Array(_len > 2 ? _len - 2 : 0), _key = 2; _key < _len; _key++) {
+      children[_key - 2] = arguments[_key];
+    }
+
+    return vnode(tag, data, data.key, children);
+  }
+
+  function createTextVnode(text) {
+    return vnode(undefined, undefined, undefined, undefined, text);
+  } //产生虚拟dom的
+
+
+  function vnode(tag, data, key, children, text) {
+    return {
+      tag: tag,
+      data: data,
+      key: key,
+      children: children,
+      text: text
     };
   }
 
@@ -525,7 +586,11 @@
   //插件1：初始化操作都在这里
 
 
-  initMixin(Vue);
+  initMixin(Vue); //插件2：生命周期，其实就是渲染
+
+  lifecycleMixin(Vue); //插件3：render生成虚拟dom
+
+  renderMixin(Vue);
 
   return Vue;
 
