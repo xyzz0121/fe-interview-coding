@@ -88,3 +88,14 @@ AST可以描述所有语法，html\css\js，虚拟dom只能描述dom。
 #### 9、根据虚拟dom生成真实dom
 
 createElm方法，递归创建元素，找到旧的元素的父元素，插到旧元素的后面，删除旧的元素 通过updateProperties 添加各种属性
+
+#### 10、全局options的合并和部分生命周期的触发
+
+Vue.mixin Vue.xxx 等全局配置或者方法，需要合并到每个Vue文件的配置里。合并到一个数组里，比如 created:[created1, created2, created3] 从前到后，从全局到自己，依次执行
+生命周期也一样，需要合并到一起，
+生命周期是什么？是一个回调函数。会在特定的时机去调用。
+使用
+beforeCreated 初始化所有数据之前
+created 初始化完所有数据
+beforeMount 挂载之前
+mounted 挂载之后

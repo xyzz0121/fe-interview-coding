@@ -16,13 +16,28 @@
     </div>
     <script src="./dist/umd/vue.js"></script>
     <script>
+        Vue.mixin({
+            created: function(){
+                console.log('mixin created1...');
+            } 
+        });
+
+        Vue.mixin({
+            created: function(){
+                console.log('mixin created2...');
+            }
+        })
+
         const vm = new Vue({
             el: "#app",
             data: function () {
                 return { arr: [{ a: 1 }], obj: {a:1, b:"asdasdasd"}, name: 'jack' };
+            },
+            created:function(){
+                console.log('my created...');
             }
         });
-        // vm.arr = 1;
+
     </script>
 </body>
 
