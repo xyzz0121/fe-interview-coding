@@ -27,6 +27,7 @@ function initMethods() {}
 
 function initData(vm) {
     let data = vm.$options.data;
+    //保存所有data，
     vm._data = data = typeof data ? data.call(vm) : data;
 
     //把vm.arr 代理到 vm._data.arr 实现真正的获取data
@@ -36,7 +37,7 @@ function initData(vm) {
     //有对象了 就要劫持 
     //对象的劫持方案：object.defineProperty();
     //对象里嵌套数组的劫持方案: 单独处理
-    observe(data);
+    observe(data); //让对象重新定义set get
 }
 
 function initWatch() {}

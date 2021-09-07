@@ -331,11 +331,13 @@
 
   function patch(oldVnode, vnode) {
     //将虚拟dom转化为真实节点 递归创建元素的过程
+    // oldVnode => id#app  vnode => 我们根据模板产生的虚拟dom
     var el = createElm(vnode); //产生真实dom
 
     var parentElm = oldVnode.parentNode; // 获取旧的节点的父亲
 
-    console.log(parentElm);
+    console.log(parentElm); //为什么insertBefore 保留原来的位置
+
     parentElm.insertBefore(el, oldVnode.nextSibiling); //当前真实元素插入到app的后面
 
     parentElm.removeChild(oldVnode); //删除旧的节点
@@ -350,7 +352,9 @@
 
     if (typeof tag === "string") {
       //创建元素，放到vnode.el上
-      vnode.el = document.createElement(tag);
+      vnode.el = document.createElement(tag); //只有元素才有属性
+
+      updateProperties(vnode);
       children.forEach(function (child) {
         vnode.el.appendChild(createElm(child));
       });
@@ -359,6 +363,24 @@
     }
 
     return vnode.el;
+  }
+
+  function updateProperties(vnode) {
+    var el = vnode.el;
+    var newProps = vnode.data || {};
+
+    for (var key in newProps) {
+      if (key == "style") {
+        for (var styleName in newProps.style) {
+          el.style[styleName] = newProps.style[styleName];
+          console.log(el);
+        }
+      } else if (key === "class") {
+        el.className = newProps[key];
+      } else {
+        el.setAttribute(key, newProps[key]);
+      }
+    }
   }
 
   function lifecycleMixin(Vue) {
@@ -444,7 +466,7 @@
       defineProperty(data, "__ob__", this); //一步一步把defineProperty全都重新定义一下 使原来的对象每个属性发生变化的时候 都能get到，也就是将一个普通对象变成一个响应式对象
 
       if (Array.isArray(data)) {
-        //函数劫持
+        //函数劫持 考虑性能原因 不使用defineproperty 选择重新方法
         data.__proto__ = arrayMethods; //如果数组里嵌套对象，还需要监控对象
 
         this.observeArray(data);
@@ -513,7 +535,8 @@
   }
 
   function initData(vm) {
-    var data = vm.$options.data;
+    var data = vm.$options.data; //保存所有data，
+
     vm._data = data = _typeof(data) ? data.call(vm) : data; //把vm.arr 代理到 vm._data.arr 实现真正的获取data
 
     for (var key in data) {
@@ -523,7 +546,7 @@
     //对象里嵌套数组的劫持方案: 单独处理
 
 
-    observe(data);
+    observe(data); //让对象重新定义set get
   }
 
   function initMixin(Vue) {
@@ -616,12 +639,13 @@
    */
 
   function Vue(options) {
-    this._init(options);
+    this._init(options); //组件初始化的入口
+
   } //Vue把原型方法拆成一个一个又一个的插件，利于拆分，结构拆分，所有原型拓展都在这里
   //插件1：初始化操作都在这里
 
 
-  initMixin(Vue); //插件2：生命周期，其实就是渲染
+  initMixin(Vue); //插件2：生命周期，其实就是渲染 指的是组件的生命周期 不是常规的生命周期  组件的挂载、更新
 
   lifecycleMixin(Vue); //插件3：render生成虚拟dom
 

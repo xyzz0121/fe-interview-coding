@@ -87,4 +87,4 @@ AST可以描述所有语法，html\css\js，虚拟dom只能描述dom。
 
 #### 9、根据虚拟dom生成真实dom
 
-createElm方法，递归创建元素，找到旧的元素的父元素，插到父元素后面，删除旧的元素
+createElm方法，递归创建元素，找到旧的元素的父元素，插到旧元素的后面，删除旧的元素 通过updateProperties 添加各种属性

@@ -10,7 +10,7 @@ class Observer{
         defineProperty(data, "__ob__", this);
         //一步一步把defineProperty全都重新定义一下 使原来的对象每个属性发生变化的时候 都能get到，也就是将一个普通对象变成一个响应式对象
         if (Array.isArray(data)) {
-            //函数劫持
+            //函数劫持 考虑性能原因 不使用defineproperty 选择重新方法
             data.__proto__ = arrayMethods;
             //如果数组里嵌套对象，还需要监控对象
             this.observeArray(data);
