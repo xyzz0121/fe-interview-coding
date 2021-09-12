@@ -99,3 +99,14 @@ beforeCreated 初始化所有数据之前
 created 初始化完所有数据
 beforeMount 挂载之前
 mounted 挂载之后
+
+#### 11、属性依赖更新
+
+数据变化，不更新视图，怎么办？ 调用 vm._update(vm._render);
+Vue的更新策略是以组件为单位的，给每个组件都增加一个watcher，属性变化后会重新调用这个watcher，这个也叫渲染watcher。
+
+1、渲染的时候创建watcher
+2、渲染之前把watcher放到全局上，之后开始取值，取值走get，就会收集当前watcher
+3、属性变化，把所有watcher 拿出来 执行一遍
+
+ 

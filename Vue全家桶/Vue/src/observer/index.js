@@ -1,5 +1,6 @@
 import { defineProperty } from "../util";
 import { arrayMethods } from "./array";
+import Dep from "./dep";
 
 /**
  * 用 defineProperty 递归把data所有属性都变成响应式
@@ -33,14 +34,22 @@ class Observer{
 //Vue.util.defineReactive 把对象的某个属性变成响应式
 function defineReactive(data, key, value) {
     observe(value);
+    let dep = new Dep(); //每个属性都有一个dep dep用来存watcher
     Object.defineProperty(data, key, {
+        //当页面取值时，说明这个值用来渲染了，那么我就将这个watcher和这个属性对应起来
+        //收集watcher
         get(){
+            if (Dep.target) { //让这个属性的dep记住这个watcher
+                dep.depend();
+            }
             return value
         },
+        //更新watcher
         set(newValue){
             if(value === newValue) return ;
             observe(newValue);
             value = newValue;
+            dep.notify();
         }
     })
 }

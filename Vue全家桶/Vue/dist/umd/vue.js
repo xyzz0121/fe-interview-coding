@@ -413,6 +413,82 @@
       return render;
     }
 
+    var Dep = /*#__PURE__*/function () {
+      function Dep() {
+        _classCallCheck(this, Dep);
+
+        this.subs = [];
+      } //get 收集watcher
+
+
+      _createClass(Dep, [{
+        key: "depend",
+        value: function depend() {
+          this.subs.push(Dep.target);
+        } //set 执行watcher
+
+      }, {
+        key: "notify",
+        value: function notify() {
+          this.subs.forEach(function (watcher) {
+            return watcher.update();
+          });
+        }
+      }]);
+
+      return Dep;
+    }();
+    Dep.target = null;
+    function pushTarget(watcher) {
+      Dep.target = watcher; //全局变量保留watcher
+    }
+    function popTarget() {
+      Dep.target = null; //将变量删除掉
+    } //多对多的关系，每个属性都有一个dep  dep是干嘛的，用来收集watcher 的
+    //dep 可以存多个watcher 其他的比如还有 vm.$watcher
+    //一个watcher可以对应多个dep
+
+    var id = 0;
+
+    var Watcher = /*#__PURE__*/function () {
+      function Watcher(vm, exprOrFn, cb, options) {
+        _classCallCheck(this, Watcher);
+
+        this.vm = vm; //vm实例
+
+        this.exprOrFn = exprOrFn; //表达式或者函数 如 vm._update(vm._render);
+
+        this.cb = cb;
+        this.options = options;
+        this.id = id++;
+
+        if (typeof exprOrFn === 'function') {
+          this.getter = exprOrFn;
+        }
+
+        this.get(); //默认调用get方法
+      }
+
+      _createClass(Watcher, [{
+        key: "get",
+        value: function get() {
+          //Dep.target加了一个watcher
+          pushTarget(this); //当前watcher实例
+
+          this.getter(); //渲染页面就要取值，就要调用get方法
+
+          popTarget();
+        }
+      }, {
+        key: "update",
+        value: function update() {
+          this.get();
+        }
+      }]);
+
+      return Watcher;
+    }();
+
     function patch(oldVnode, vnode) {
       //将虚拟dom转化为真实节点 递归创建元素的过程
       // oldVnode => id#app  vnode => 我们根据模板产生的虚拟dom
@@ -424,6 +500,8 @@
       parentElm.insertBefore(el, oldVnode.nextSibiling); //当前真实元素插入到app的后面
 
       parentElm.removeChild(oldVnode); //删除旧的节点
+
+      return el;
     }
 
     function createElm(vnode) {
@@ -467,14 +545,21 @@
 
     function lifecycleMixin(Vue) {
       Vue.prototype._update = function (vnode) {
-        var vm = this;
-        patch(vm.$el, vnode);
+        var vm = this; //新创建的替换老的
+
+        vm.$el = patch(vm.$el, vnode);
       };
     }
     function mountComponent(vm, el) {
       callHook(vm, 'beforeMount'); //先调用render方法创建虚拟节点，再将虚拟节点渲染到页面上 vue核心！！！！
 
-      vm._update(vm._render());
+      var updateComponent = function updateComponent() {
+        vm._update(vm._render());
+      };
+
+      new Watcher(vm, updateComponent, function () {
+        callHook(vm, 'beforeUpdate');
+      }, true); // vm._update(vm._render());
 
       callHook(vm, 'mounted');
     }
@@ -571,14 +656,25 @@
 
     function defineReactive(data, key, value) {
       observe(value);
+      var dep = new Dep(); //每个属性都有一个dep dep用来存watcher
+
       Object.defineProperty(data, key, {
+        //当页面取值时，说明这个值用来渲染了，那么我就将这个watcher和这个属性对应起来
+        //收集watcher
         get: function get() {
+          if (Dep.target) {
+            //让这个属性的dep记住这个watcher
+            dep.depend();
+          }
+
           return value;
         },
+        //更新watcher
         set: function set(newValue) {
           if (value === newValue) return;
           observe(newValue);
           value = newValue;
+          dep.notify();
         }
       });
     }

@@ -6,6 +6,7 @@ export function patch(oldVnode, vnode){
     //为什么insertBefore 保留原来的位置
     parentElm.insertBefore(el, oldVnode.nextSibiling);//当前真实元素插入到app的后面
     parentElm.removeChild(oldVnode); //删除旧的节点
+    return el;
 }
 
 function createElm(vnode){
