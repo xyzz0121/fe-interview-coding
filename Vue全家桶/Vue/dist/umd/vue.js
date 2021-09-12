@@ -413,18 +413,27 @@
       return render;
     }
 
+    var id$1 = 0;
+
     var Dep = /*#__PURE__*/function () {
       function Dep() {
         _classCallCheck(this, Dep);
 
         this.subs = [];
+        this.id = id$1++;
       } //get 收集watcher
 
 
       _createClass(Dep, [{
         key: "depend",
         value: function depend() {
-          this.subs.push(Dep.target);
+          Dep.target.addDep(this); //实现双向记忆 dep和watcher
+        } //dep 收集watcher
+
+      }, {
+        key: "addSub",
+        value: function addSub(watcher) {
+          this.subs.push(watcher);
         } //set 执行watcher
 
       }, {
@@ -461,6 +470,8 @@
         this.cb = cb;
         this.options = options;
         this.id = id++;
+        this.deps = [];
+        this.depsId = new Set();
 
         if (typeof exprOrFn === 'function') {
           this.getter = exprOrFn;
@@ -470,6 +481,17 @@
       }
 
       _createClass(Watcher, [{
+        key: "addDep",
+        value: function addDep(dep) {
+          var id = dep.id;
+
+          if (!this.depsId.has(id)) {
+            this.deps.push(dep);
+            this.depsId.add(id);
+            dep.addSub(this);
+          }
+        }
+      }, {
         key: "get",
         value: function get() {
           //Dep.target加了一个watcher
@@ -667,6 +689,7 @@
             dep.depend();
           }
 
+          console.log(dep.subs);
           return value;
         },
         //更新watcher

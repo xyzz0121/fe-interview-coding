@@ -1,10 +1,16 @@
+let id = 0;
 class Dep{
     constructor(){
         this.subs = [];
+        this.id = id++;
     }
     //get 收集watcher
     depend(){
-        this.subs.push(Dep.target);
+        Dep.target.addDep(this); //实现双向记忆 dep和watcher
+    }
+    //dep 收集watcher
+    addSub(watcher){  
+        this.subs.push(watcher);
     }
     //set 执行watcher
     notify(){

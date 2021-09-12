@@ -42,6 +42,7 @@ function defineReactive(data, key, value) {
             if (Dep.target) { //让这个属性的dep记住这个watcher
                 dep.depend();
             }
+            console.log(dep.subs);
             return value
         },
         //更新watcher

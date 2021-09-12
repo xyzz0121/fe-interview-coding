@@ -109,4 +109,12 @@ Vue的更新策略是以组件为单位的，给每个组件都增加一个watch
 2、渲染之前把watcher放到全局上，之后开始取值，取值走get，就会收集当前watcher
 3、属性变化，把所有watcher 拿出来 执行一遍
 
+整体时间线：
+1、组件有el或者template，是不是要渲染
+2、渲染靠什么？靠的watcher
+3、watcher主要干嘛的？调用 vm._update(vm.render())
+ 
+ dep和watcher 多对多
+ dep对多watcher，一个属性的渲染watcher和自定义watcher 等
+ watcher对多dep，记录哪些dep依赖了这个watcher，实现computed时候用的到
  
