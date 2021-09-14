@@ -117,4 +117,10 @@ Vue的更新策略是以组件为单位的，给每个组件都增加一个watch
  dep和watcher 多对多
  dep对多watcher，一个属性的渲染watcher和自定义watcher 等
  watcher对多dep，记录哪些dep依赖了这个watcher，实现computed时候用的到
+
+ #### 12、数组更新
+ 1、取arr的值，会调用get方法，然后我们希望数组记住这个渲染watcher
+ 2、我们给所有对象类型都增加一个dep属性
+ 3、页面取值时，dep.depend 这个watcher
+ 4、数组更新时，(push/shift等)，找到数组依赖的watcher进行更新
  

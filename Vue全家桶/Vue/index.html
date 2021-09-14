@@ -9,7 +9,7 @@
 </head>
 
 <body>
-    <div id="app" style="color: red">hello, {{name}}{{name}}{{name}}
+    <div id="app" style="color: red">hello, {{ arr }}
     </div>
     <script src="./dist/umd/vue.js"></script>
     <script>
@@ -28,7 +28,7 @@
         const vm = new Vue({
             el: "#app",
             data: function () {
-                return { arr: [{ a: 1 }], obj: {a:1, b:"asdasdasd"}, name: 'jack' };
+                return { arr: [{a:1}, 2, 1,2] };
             },
             created:function(){
                 console.log('my created...');
@@ -36,7 +36,7 @@
         });
 
        setTimeout(() => {
-            vm.name = "lucas";
+            vm.arr.push(1000);
        }, 2000);
 
         // vm._update(vm._render());

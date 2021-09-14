@@ -19,7 +19,7 @@ const methods = [
 //先走自己的逻辑，然后调用原来的逻辑
 methods.forEach(method => {
     arrayMethods[method] = function (...args) {
-        console.log("数组方法被调用了", method);
+        
         const ob = this.__ob__;
         const result = oldArrayProtoMethods[method].apply(this, args); //this 就是 observer constructor里的data
         let inserted;
@@ -37,7 +37,7 @@ methods.forEach(method => {
         if (inserted) {
             ob.observeArray(inserted);
         }
-
+        ob.dep.notify();
         return result;
     }
 })

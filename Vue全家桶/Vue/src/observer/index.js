@@ -7,6 +7,7 @@ import Dep from "./dep";
  */
 class Observer{
     constructor(data){
+        this.dep = new Dep(); //如果是对象、数组，给对象或者数组本身增加dep（注意不是里面的属性哦，而是整个数组或者对象）
         //hack骚操作，把observeArray挂在调用函数的this上，在array.js里还可以使用。同时也可以标记对象或者数组已经被观测。
         defineProperty(data, "__ob__", this);
         //一步一步把defineProperty全都重新定义一下 使原来的对象每个属性发生变化的时候 都能get到，也就是将一个普通对象变成一个响应式对象
@@ -33,7 +34,7 @@ class Observer{
 }
 //Vue.util.defineReactive 把对象的某个属性变成响应式
 function defineReactive(data, key, value) {
-    observe(value);
+    let ob = observe(value);
     let dep = new Dep(); //每个属性都有一个dep dep用来存watcher
     Object.defineProperty(data, key, {
         //当页面取值时，说明这个值用来渲染了，那么我就将这个watcher和这个属性对应起来
@@ -41,8 +42,10 @@ function defineReactive(data, key, value) {
         get(){
             if (Dep.target) { //让这个属性的dep记住这个watcher
                 dep.depend();
+                if (ob) {
+                    ob.dep.depend();
+                }
             }
-            console.log(dep.subs);
             return value
         },
         //更新watcher
