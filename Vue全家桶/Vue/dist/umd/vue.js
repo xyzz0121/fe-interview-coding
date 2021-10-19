@@ -494,7 +494,8 @@
       }, {
         key: "get",
         value: function get() {
-          //Dep.target加了一个watcher
+          console.log(111); //Dep.target加了一个watcher
+
           pushTarget(this); //当前watcher实例
 
           this.getter(); //渲染页面就要取值，就要调用get方法
@@ -502,14 +503,44 @@
           popTarget();
         }
       }, {
+        key: "run",
+        value: function run() {
+          this.get();
+        }
+      }, {
         key: "update",
         value: function update() {
-          this.get();
+          queueWatcher(this);
         }
       }]);
 
       return Watcher;
     }();
+
+    var queue = [];
+    var has = {};
+    var pending = false;
+
+    function queueWatcher(watcher) {
+      var id = watcher.id;
+
+      if (has[id] == null) {
+        queue.push(watcher);
+        has[id] = true;
+
+        if (!pending) {
+          setTimeout(function () {
+            queue.forEach(function (watcher) {
+              return watcher.run();
+            });
+            queue = [];
+            has = {};
+            pending = false;
+          }, 0);
+          pending = true;
+        }
+      }
+    }
 
     function patch(oldVnode, vnode) {
       //将虚拟dom转化为真实节点 递归创建元素的过程
