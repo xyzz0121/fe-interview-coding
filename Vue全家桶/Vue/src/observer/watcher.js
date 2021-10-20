@@ -1,3 +1,4 @@
+import { nextTick } from "../util";
 import { popTarget, pushTarget } from "./dep";
 
 let id = 0;
@@ -24,7 +25,6 @@ class Watcher{
         }
     }
     get(){ 
-        console.log(111);
         //Dep.target加了一个watcher
         pushTarget(this); //当前watcher实例
         this.getter(); //渲染页面就要取值，就要调用get方法
@@ -42,18 +42,20 @@ let queue = [];
 let has = {};
 let pending = false;
 
+function flushSchedulerQueue(){
+    queue.forEach(watcher => watcher.run());
+    queue = [];
+    has = {};
+    pending = false;
+}
+
 function queueWatcher(watcher){
     const id = watcher.id;
     if (has[id] == null) {
         queue.push(watcher);
         has[id] = true;
         if (!pending) {
-            setTimeout(() => {
-                queue.forEach(watcher => watcher.run());
-                queue = [];
-                has = {};
-                pending = false;
-            }, 0);
+            nextTick(flushSchedulerQueue);
             pending = true;
         }
     }

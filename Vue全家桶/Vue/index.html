@@ -39,6 +39,10 @@
             vm.arr.push(1000);
             vm.arr.push(1001);
             vm.arr.push(1002);
+            console.log(vm.$el.innerHTML, "111111111111");
+            vm.$nextTick(() => {
+                console.log(vm.$el.innerHTML, "222222222222");
+            })
        }, 2000);
 
         // vm._update(vm._render());

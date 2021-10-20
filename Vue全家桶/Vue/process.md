@@ -124,3 +124,5 @@ Vue的更新策略是以组件为单位的，给每个组件都增加一个watch
  3、页面取值时，dep.depend 这个watcher
  4、数组更新时，(push/shift等)，找到数组依赖的watcher进行更新
  
+ #### 13、nextTick
+ 1、watcher去重，顺序执行nextTick回调，异步修改数据

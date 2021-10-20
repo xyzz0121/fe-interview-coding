@@ -78,6 +78,54 @@
 
       return options;
     }
+    var callbacks = [];
+    var pending$1 = false;
+
+    function flushCallbacks() {
+      // callbacks.forEach(cb => cb());
+      while (callbacks.length) {
+        var cb = callbacks.pop();
+        cb();
+      }
+
+      pending$1 = false;
+    }
+
+    var timerFunc;
+
+    if (Promise) {
+      timerFunc = function timerFunc() {
+        Promise.resolve().then(flushCallbacks);
+      };
+    } else if (MutationObserver) {
+      var observer = new MutationObserver(flushCallbacks);
+      var textNode = document.createTextNode(1);
+      observer.observe(textNode, {
+        characterData: true
+      });
+
+      timerFunc = function timerFunc() {
+        textNode.textContent = 2;
+      };
+    } else if (setImmediate) {
+      timerFunc = function timerFunc() {
+        setImmediate(flushCallbacks);
+      };
+    } else {
+      timerFunc = function timerFunc() {
+        setTimeout(flushCallbacks);
+      };
+    }
+
+    function nextTick(cb) {
+      callbacks.push(cb);
+
+      if (!pending$1) {
+        timerFunc();
+        pending$1 = true;
+      } // Promise.resolve().then();
+
+    }
 
     function initGlobalApi(Vue) {
       Vue.options = {};
@@ -494,8 +542,7 @@
       }, {
         key: "get",
         value: function get() {
-          console.log(111); //Dep.target加了一个watcher
-
+          //Dep.target加了一个watcher
           pushTarget(this); //当前watcher实例
 
           this.getter(); //渲染页面就要取值，就要调用get方法
@@ -521,6 +568,15 @@
     var has = {};
     var pending = false;
 
+    function flushSchedulerQueue() {
+      queue.forEach(function (watcher) {
+        return watcher.run();
+      });
+      queue = [];
+      has = {};
+      pending = false;
+    }
+
     function queueWatcher(watcher) {
       var id = watcher.id;
 
@@ -529,14 +585,7 @@
         has[id] = true;
 
         if (!pending) {
-          setTimeout(function () {
-            queue.forEach(function (watcher) {
-              return watcher.run();
-            });
-            queue = [];
-            has = {};
-            pending = false;
-          }, 0);
+          nextTick(flushSchedulerQueue);
           pending = true;
         }
       }
@@ -777,6 +826,12 @@
       observe(data); //让对象重新定义set get
     }
 
+    function stateMixin(Vue) {
+      Vue.prototype.$nextTick = function (cb) {
+        nextTick(cb);
+      };
+    }
+
     function initMixin(Vue) {
       Vue.prototype._init = function (options) {
         var vm = this;
@@ -879,7 +934,9 @@
 
     lifecycleMixin(Vue); //插件3：render生成虚拟dom
 
-    renderMixin(Vue); //静态方法
+    renderMixin(Vue); //nextTick
+
+    stateMixin(Vue); //静态方法
 
     initGlobalApi(Vue);
 
