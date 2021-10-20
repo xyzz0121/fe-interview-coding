@@ -16,7 +16,7 @@ export default {
         serve({
             port: 3000,
             contentBase: "",
-            openPage: "index.html"
+            openPage: "watch.html"
         })
     ]
 }

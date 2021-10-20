@@ -126,3 +126,7 @@ Vue的更新策略是以组件为单位的，给每个组件都增加一个watch
  
  #### 13、nextTick
  1、watcher去重，顺序执行nextTick回调，异步修改数据
+
+ #### 14、watch的原理
+
+ 定义一个用户watcher，字符串拆分变量，关联变量和用户watcher，变化时更新watcher

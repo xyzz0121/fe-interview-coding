@@ -1,6 +1,7 @@
 import {
     observe
 } from "./observer/index";
+import Watcher from "./observer/watcher";
 import {
     nextTick,
     proxy
@@ -45,12 +46,38 @@ function initData(vm) {
     observe(data); //让对象重新定义set get
 }
 
-function initWatch() {}
+function initWatch(vm) {
+    const watch = vm.$options.watch;
+    for (const key in watch) {
+        const handler = watch[key];
+        if (Array.isArray(handler)) {
+            handler.forEach(handle => {
+                createWatcher(vm, key, handle);
+            })
+        }else{
+            createWatcher(vm, key, handler);
+        }
+    }
+}
+
+function createWatcher(vm, exprOrFn, handler, options){
+    if (typeof handler == "object") {
+        options = handler;
+        handler = handler.handler
+    }
+    if (typeof handler == "string") {
+        handler = vm[handler];
+    }
+    return vm.$watch(exprOrFn, handler, options);
+}
 
 function initComputed() {}
 
 export function stateMixin(Vue) {
     Vue.prototype.$nextTick = function (cb) {
         nextTick(cb);
+    }
+    Vue.prototype.$watch = function(exprOrFn, cb, options){
+        let watcher = new Watcher(this, exprOrFn, cb, {...options, user: true});
     }
 }

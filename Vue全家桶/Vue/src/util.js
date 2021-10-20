@@ -35,8 +35,8 @@ const strats = {};
 strats.data = function(parentVal, childVal){
     return childVal
 };
-strats.computed = function(){};
-strats.watch = function(){};
+// strats.computed = function(){};
+// strats.watch = function(){};
 //生命周期的合并
 function mergeHook(parentVal, childVal){
     if (childVal) {
