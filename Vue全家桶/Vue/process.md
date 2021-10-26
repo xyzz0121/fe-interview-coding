@@ -130,3 +130,86 @@ Vue的更新策略是以组件为单位的，给每个组件都增加一个watch
  #### 14、watch的原理
 
  定义一个用户watcher，字符串拆分变量，关联变量和用户watcher，变化时更新watcher
+
+ #### 15、diff算法
+
+ patch:对比新旧虚拟节点 创建更新真实dom
+
+ 直接对比两棵树的时间复杂度是On3, 按层比较，如果一样，再比较儿子，复杂度On，父级都不一样的话，就不用接着比了
+
+
+ 伪代码：
+ 1、先比较两个元素的标签、标签不一样直接替换即可。
+ if(oldVnode.tag !== vnode.tag){
+     return oldVnode.pareat.replaceChild(createEl(vnode), oldVnod.el);
+ }
+ 2、标签一样，都是undefined，说明是文本，比较文本，不一样直接替换
+ oldVnode.el.textCountent = vnode.text
+ 3、标签一样，上面都没命中，复用老节点（html结构不会更新，只更新变化的属性），新老属性对比，更新属性（以新节点的属性为基准，老的有新的没有，删除；新的有老的没有，增加；都有，覆盖等）
+ vnode.el = oldVnode.el;
+ updateProperties(vnode, oldNode.data)
+ 4、属性比较完了，该比较儿子了（以新节点为基准，老的有新的没有，干掉老的；老的没，新的有，增加；
+ 都有 => 真正的diff算法）
+ oldChildren = oldValue.children 
+ newChildren = vnode.children
+
+ if(oldChildren.length>0 && newChildren.length>0){ //都有
+     //!!!diff算法 核心算法
+     updateChildren(oldChildren,newChildren);
+ }else if(oldChildren.length>0){ //老的有，新的没有
+    //置空
+    innerHTML = "";
+ }else if(newChildren.length>0){ //新的有，老的没有
+    //遍历新的孩子数组 都插入进去
+    el.appendChild(createELm(child))
+ }
+
+ function updateChildren(oldChildren,newChildren){
+     //这里vue diff做了很多优化
+     //1、节点插入头、尾、正序倒序等，vue2采取双指针（其实就是数组下标）的方式，为什么双指针？因为可能在头部或者尾部插入，如果只有一个，那有可能出现对比孩子全都不一样。
+     oldstart=0;
+     oldend=old.length-1;
+     newstart=0;
+     newend=new.length-1;
+     //谁先结束就停止
+     while(oldstart <= oldend && newoldstart <= newend){
+         //如果头一样，就从前向后比
+         if(isSameVnode(oldStartVnode,newStartVnode)){
+             patch(oldStartVnode,newStartVnode)
+             ++oldstart;
+             ++newstart;
+         }
+        //如果尾一样 就从后向前比
+         else if(isSameVnode(oldEndVnode,newEndVnode)){
+            patch(oldEndVnode,newEndVnode)
+             --oldEnd;
+             --newEnd;
+         }
+         //头尾交叉比 老尾新头
+         else if(){
+
+         }
+         //头尾交叉比 老头新尾
+         else if(){
+
+         }
+         //儿子之间完全没关系，暴力比对 遍历新节点 一个一个在老节点里找，找到复用 找不到插入到老的前面
+         else{
+             
+         }
+     }
+     //结束之后 newStart < newEnd 将多余的插入
+ }
+//判断是不是一个相同的虚拟节点 
+为什么要有key？移动元素的速度要快于修改或者创建；
+如果不写key 节点就会复用，会重新创建元素，性能差，涉及表单input的话，顺序变化，可能第一个框的值出现在第二个框里。
+为什么不能用index当key？
+同上
+
+ function isSameVnode(old,new){
+     return old.tag === new.tag && old.key === new.key;
+ }
+
+ 
+
+
