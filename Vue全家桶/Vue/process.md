@@ -210,6 +210,14 @@ Vue的更新策略是以组件为单位的，给每个组件都增加一个watch
      return old.tag === new.tag && old.key === new.key;
  }
 
+#### 15、computed
+
+内部也使用了defineProperty,每次取值， 多一个变量dirty，如果是脏的，就取值，取过值之后就标识为干净的，就不会重新取值。什么时候修改dirty，watcher更新的时候， 包装一个getter方法， 控制computed要不要执行
+computed 也是一个watcher 内部依赖的属性会收集这个watcher
+
+
+
+
  
 
 
